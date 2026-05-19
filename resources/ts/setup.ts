@@ -7,11 +7,13 @@ import { createApp } from 'vue';
 const WelcomeComponent              =   () => import( './pages/setup/welcome.vue' );
 const DatabaseComponent             =   () => import( './pages/setup/database.vue' );
 const SetupConfigurationComponent   =   () => import( './pages/setup/setup-configuration.vue' );
+const QuickSetupComponent           =   () => import( './pages/setup/QuickSetup.vue' );
 
 const routes    =   [
     { path: '/', component: WelcomeComponent },
     { path: '/database', component: DatabaseComponent },
     { path: '/configuration', component: SetupConfigurationComponent },
+    { path: '/quick-setup', component: QuickSetupComponent },
 ];
 
 const nsRouter      =   createRouter({ routes, history: createWebHashHistory() });

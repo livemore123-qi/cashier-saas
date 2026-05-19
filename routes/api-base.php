@@ -55,4 +55,5 @@ Route::prefix( 'setup' )
         Route::post( 'database', [ SetupController::class, 'checkDatabase' ] );
         Route::get( 'database', [ SetupController::class, 'checkDbConfigDefined' ] );
         Route::post( 'configuration', [ SetupController::class, 'saveConfiguration' ] );
+        Route::post( 'quick-setup', [ SetupController::class, 'processQuickSetup' ] );
     } );
