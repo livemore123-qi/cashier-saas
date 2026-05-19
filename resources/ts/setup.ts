@@ -10,10 +10,9 @@ const SetupConfigurationComponent   =   () => import( './pages/setup/setup-confi
 const QuickSetupComponent           =   () => import( './pages/setup/QuickSetup.vue' );
 
 const routes    =   [
-    { path: '/', component: WelcomeComponent },
+    { path: '/', component: QuickSetupComponent },
     { path: '/database', component: DatabaseComponent },
     { path: '/configuration', component: SetupConfigurationComponent },
-    { path: '/quick-setup', component: QuickSetupComponent },
 ];
 
 const nsRouter      =   createRouter({ routes, history: createWebHashHistory() });
