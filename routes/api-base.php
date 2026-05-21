@@ -14,9 +14,10 @@ Route::middleware( [
 ] )->group( function () {
     include dirname( __FILE__ ) . '/api/fields.php';
 
-    Route::middleware( [
+        Route::middleware( [
         'auth:sanctum',
     ] )->group( function () {
+        include dirname( __FILE__ ) . '/api/sync.php';
         include dirname( __FILE__ ) . '/api/dashboard.php';
         include dirname( __FILE__ ) . '/api/categories.php';
         include dirname( __FILE__ ) . '/api/customers.php';

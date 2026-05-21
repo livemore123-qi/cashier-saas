@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>收银系统 - 收银台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',-apple-system,Arial,sans-serif;background:#f8fafc;display:flex;height:100vh;overflow:hidden}
+.left{width:65%;display:flex;flex-direction:column;border-right:1px solid #e2e8f0}
+.right{width:35%;display:flex;flex-direction:column;background:#fff}
+.header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:20px}
+.user-info{display:flex;align-items:center;gap:12px}
+.user-info .name{font-size:14px}
+.user-info .btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer}
+.user-info .btn:hover{background:rgba(255,255,255,.3)}
+.scan-area{padding:24px;background:#fff;border-bottom:1px solid #e2e8f0}
+.scan-box{border:2px dashed #cbd5e1;border-radius:16px;padding:40px;text-align:center;transition:border-color .3s}
+.scan-box:hover{border-color:#3b82f6}
+.scan-box.active{border-color:#10b981;border-style:solid}
+.scan-box svg{width:64px;height:64px;color:#94a3b8;margin-bottom:12px}
+.scan-box input{width:100%;max-width:300px;padding:12px 16px;border:1px solid #e2e8f0;border-radius:10px;font-size:16px;text-align:center;outline:none;margin-top:8px}
+.scan-box input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.scan-box .hint{font-size:13px;color:#94a3b8;margin-top:8px}
+.products{flex:1;overflow-y:auto;padding:16px}
+.products h3{font-size:14px;color:#64748b;margin-bottom:12px;padding-left:8px}
+.product-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.product-item{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.product-item:hover{border-color:#3b82f6;box-shadow:0 4px 12px rgba(59,130,246,.15);transform:translateY(-2px)}
+.product-item img{width:64px;height:64px;border-radius:8px;background:#f1f5f9;margin-bottom:8px}
+.product-item .name{font-size:13px;color:#1e293b;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.product-item .price{font-size:16px;color:#ef4444;font-weight:700;margin-top:4px}
+.cart-header{padding:16px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.cart-header h2{font-size:16px}
+.cart-header .clear{color:#ef4444;font-size:13px;cursor:pointer}
+.cart-header .clear:hover{text-decoration:underline}
+.cart-list{flex:1;overflow-y:auto;padding:16px 24px}
+.cart-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #f1f5f9}
+.cart-item:last-child{border-bottom:none}
+.cart-item .info{flex:1}
+.cart-item .name{font-size:14px;color:#1e293b}
+.cart-item .price{font-size:14px;color:#ef4444}
+.cart-item .qty{display:flex;align-items:center;gap:8px}
+.cart-item .qty-btn{width:28px;height:28px;border:1px solid #e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.cart-item .qty-btn:hover{background:#f1f5f9}
+.cart-item .qty-num{min-width:32px;text-align:center;font-size:14px}
+.cart-item .remove{color:#94a3b8;font-size:12px;margin-left:8px;cursor:pointer}
+.cart-item .remove:hover{color:#ef4444}
+.cart-total{padding:20px 24px;border-top:1px solid #e2e8f0;background:#f8fafc}
+.total-row{display:flex;justify-content:space-between;margin-bottom:8px}
+.total-row label{font-size:14px;color:#64748b}
+.total-row .value{font-size:14px;color:#1e293b}
+.total-row.total label{font-size:16px;font-weight:600;color:#1e293b}
+.total-row.total .value{font-size:28px;font-weight:700;color:#ef4444}
+.payment{padding:20px 24px;border-top:1px solid #e2e8f0}
+.payment-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.pay-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .2s}
+.pay-btn:hover{border-color:#3b82f6;background:#eff6ff}
+.pay-btn.active{border-color:#3b82f6;background:#3b82f6;color:#fff}
+.pay-btn svg{width:24px;height:24px}
+.amount-input{display:flex;gap:12px;margin-bottom:16px}
+.amount-input input{flex:1;padding:14px;border:1px solid #e2e8f0;border-radius:10px;font-size:18px;text-align:right;outline:none}
+.amount-input input:focus{border-color:#3b82f6}
+.amount-input .label{display:flex;align-items:center;font-size:16px;color:#64748b}
+.pay-submit{width:100%;padding:18px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.pay-submit:hover{opacity:.9}
+.pay-submit:active{transform:scale(.98)}
+.pay-submit:disabled{opacity:.5;cursor:not-allowed}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;display:none}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:90%;max-width:500px;overflow:hidden}
+.modal-header{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:24px;text-align:center}
+.modal-header svg{width:48px;height:48px;margin-bottom:12px}
+.modal-header h3{font-size:20px}
+.modal-body{padding:24px}
+.receipt{background:#f8fafc;border-radius:12px;padding:20px;font-family:monospace;font-size:13px;white-space:pre-wrap;line-height:1.6}
+.receipt .title{text-align:center;font-weight:bold;margin-bottom:8px}
+.receipt .info{color:#666;margin-bottom:12px}
+.receipt .items{margin-bottom:12px}
+.receipt .total{font-weight:bold;margin-top:8px}
+.modal-footer{padding:16px 24px;border-top:1px solid #e2e8f0;text-align:right}
+.modal-footer button{padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.modal-footer button:hover{background:#2563eb}
+.keyboard{display:flex;flex-wrap:wrap;padding:16px;background:#fff;border-top:1px solid #e2e8f0}
+.key-btn{width:calc(25% - 8px);margin:4px;padding:16px;font-size:18px;font-weight:600;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;background:#f8fafc}
+.key-btn:hover{background:#e2e8f0}
+.key-btn.num{background:#fff}
+.key-btn.action{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.key-btn.action:hover{background:#2563eb}
+.key-btn.clear{background:#ef4444;color:#fff;border-color:#ef4444}
+.key-btn.clear:hover{background:#dc2626}
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="header">
+    <h1>收银台</h1>
+    <div class="user-info">
+      <span class="name">收银员</span>
+      <button class="btn" onclick="logout()">退出登录</button>
+    </div>
+  </div>
+  <div class="scan-area">
+    <div class="scan-box" id="scanBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <div>扫描商品条码或手动输入</div>
+      <input type="text" id="barcodeInput" placeholder="扫码或输入条码" onkeydown="if(event.keyCode==13) addByBarcode()">
+      <div class="hint">按 Enter 快速添加</div>
+    </div>
+  </div>
+  <div class="products">
+    <h3>快捷商品</h3>
+    <div class="product-grid" id="productGrid">
+    </div>
+  </div>
+</div>
+<div class="right">
+  <div class="cart-header">
+    <h2>购物车</h2>
+    <span class="clear" onclick="clearCart()">清空</span>
+  </div>
+  <div class="cart-list" id="cartList">
+    <div style="text-align:center;color:#94a3b8;padding:40px">购物车为空</div>
+  </div>
+  <div class="cart-total">
+    <div class="total-row">
+      <label>商品数量</label>
+      <span class="value" id="totalCount">0</span>
+    </div>
+    <div class="total-row">
+      <label>商品金额</label>
+      <span class="value">¥<span id="subtotal">0.00</span></span>
+    </div>
+    <div class="total-row">
+      <label>优惠</label>
+      <span class="value">-¥<span id="discount">0.00</span></span>
+    </div>
+    <div class="total-row total">
+      <label>应收金额</label>
+      <span class="value">¥<span id="total">0.00</span></span>
+    </div>
+  </div>
+  <div class="payment">
+    <div class="payment-methods">
+      <div class="pay-btn active" id="payWechat" onclick="selectPayMethod('wechat')">
+        <svg viewBox="0 0 24 24" fill="#07C160"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c4.801 0 8.692-3.287 8.692-7.342 0-4.054-3.891-7.339-8.692-7.339zm-3.11 4.219c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.47 7.58c0-.651.52-1.18 1.111-1.18zm6.222 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.11 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18z"/></svg>
+        <span>微信支付</span>
+      </div>
+      <div class="pay-btn" id="payAlipay" onclick="selectPayMethod('alipay')">
+        <svg viewBox="0 0 24 24" fill="#1677FF"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <span>支付宝</span>
+      </div>
+    </div>
+    <div class="amount-input">
+      <span class="label">实收</span>
+      <input type="number" id="receivedAmount" placeholder="0.00" oninput="updateChange()">
+    </div>
+    <div class="total-row" style="padding:0 24px;">
+      <label>找零</label>
+      <span class="value" style="color:#10b981;font-weight:600">¥<span id="change">0.00</span></span>
+    </div>
+    <button class="pay-submit" id="payBtn" onclick="submitPayment()" disabled>结 算</button>
+  </div>
+</div>
+<div class="keyboard" id="numberKeyboard" style="display:none">
+  <div class="key-btn num" onclick="appendNumber('1')">1</div>
+  <div class="key-btn num" onclick="appendNumber('2')">2</div>
+  <div class="key-btn num" onclick="appendNumber('3')">3</div>
+  <div class="key-btn action" onclick="appendNumber('.')">.</div>
+  <div class="key-btn num" onclick="appendNumber('4')">4</div>
+  <div class="key-btn num" onclick="appendNumber('5')">5</div>
+  <div class="key-btn num" onclick="appendNumber('6')">6</div>
+  <div class="key-btn action" onclick="appendNumber('00')">00</div>
+  <div class="key-btn num" onclick="appendNumber('7')">7</div>
+  <div class="key-btn num" onclick="appendNumber('8')">8</div>
+  <div class="key-btn num" onclick="appendNumber('9')">9</div>
+  <div class="key-btn clear" onclick="clearNumber()">C</div>
+  <div class="key-btn num" onclick="appendNumber('0')">0</div>
+</div>
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 13l4 4L19 7"/>
+      </svg>
+      <h3>支付成功</h3>
+    </div>
+    <div class="modal-body">
+      <div class="receipt" id="receiptContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal()">完成</button>
+    </div>
+  </div>
+</div>
+<script>
+const products = [
+  { id: 'P001', name: '可口可乐 500ml', price: 3.5, image: '🍹' },
+  { id: 'P002', name: '矿泉水 550ml', price: 2.0, image: '💧' },
+  { id: 'P003', name: '方便面', price: 4.5, image: '🍜' },
+  { id: 'P004', name: '面包', price: 6.0, image: '🍞' },
+  { id: 'P005', name: '牛奶', price: 5.5, image: '🥛' },
+  { id: 'P006', name: '火腿肠', price: 3.0, image: '🌭' },
+  { id: 'P007', name: '薯片', price: 8.0, image: '🍟' },
+  { id: 'P008', name: '巧克力', price: 12.0, image: '🍫' },
+  { id: 'P009', name: '口香糖', price: 5.0, image: '🍬' },
+  { id: 'P010', name: '香烟', price: 25.0, image: '🚬' },
+];
+let cart = [];
+let payMethod = 'wechat';
+function initProducts() {
+  const grid = document.getElementById('productGrid');
+  products.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'product-item';
+    item.innerHTML = `
+      <div style="font-size:40px">${p.image}</div>
+      <div class="name">${p.name}</div>
+      <div class="price">¥${p.price.toFixed(2)}</div>
+    `;
+    item.onclick = () => addToCart(p);
+    grid.appendChild(item);
+  });
+}
+function addToCart(product) {
+  const existing = cart.find(item => item.id === product.id);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ ...product, quantity: 1 });
+  }
+  updateCart();
+}
+function updateCart() {
+  const list = document.getElementById('cartList');
+  const totalCount = document.getElementById('totalCount');
+  const subtotal = document.getElementById('subtotal');
+  const discount = document.getElementById('discount');
+  const total = document.getElementById('total');
+  if (cart.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:40px">购物车为空</div>';
+    totalCount.textContent = '0';
+    subtotal.textContent = '0.00';
+    discount.textContent = '0.00';
+    total.textContent = '0.00';
+    document.getElementById('payBtn').disabled = true;
+    return;
+  }
+  let html = '';
+  let count = 0;
+  let sum = 0;
+  cart.forEach((item, index) => {
+    count += item.quantity;
+    sum += item.price * item.quantity;
+    html += `
+      <div class="cart-item">
+        <div class="info">
+          <div class="name">${item.name}</div>
+          <div class="price">¥${item.price.toFixed(2)}</div>
+        </div>
+        <div class="qty">
+          <div class="qty-btn" onclick="changeQty(${index}, -1)">-</div>
+          <div class="qty-num">${item.quantity}</div>
+          <div class="qty-btn" onclick="changeQty(${index}, 1)">+</div>
+        </div>
+        <div class="remove" onclick="removeItem(${index})">删除</div>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+  totalCount.textContent = count;
+  subtotal.textContent = sum.toFixed(2);
+  discount.textContent = '0.00';
+  total.textContent = sum.toFixed(2);
+  document.getElementById('payBtn').disabled = false;
+}
+function changeQty(index, delta) {
+  cart[index].quantity += delta;
+  if (cart[index].quantity <= 0) {
+    cart.splice(index, 1);
+  }
+  updateCart();
+  updateChange();
+}
+function removeItem(index) {
+  cart.splice(index, 1);
+  updateCart();
+  updateChange();
+}
+function clearCart() {
+  cart = [];
+  updateCart();
+  document.getElementById('receivedAmount').value = '';
+  document.getElementById('change').textContent = '0.00';
+}
+function selectPayMethod(method) {
+  payMethod = method;
+  document.getElementById('payWechat').className = method === 'wechat' ? 'pay-btn active' : 'pay-btn';
+  document.getElementById('payAlipay').className = method === 'alipay' ? 'pay-btn active' : 'pay-btn';
+}
+function updateChange() {
+  const received = parseFloat(document.getElementById('receivedAmount').value) || 0;
+  const total = parseFloat(document.getElementById('total').textContent) || 0;
+  const change = Math.max(0, received - total);
+  document.getElementById('change').textContent = change.toFixed(2);
+}
+function appendNumber(num) {
+  const input = document.getElementById('receivedAmount');
+  if (num === '.') {
+    if (!input.value.includes('.')) {
+      input.value += num;
+    }
+  } else {
+    input.value += num;
+  }
+  updateChange();
+}
+function clearNumber() {
+  document.getElementById('receivedAmount').value = '';
+  document.getElementById('change').textContent = '0.00';
+}
+function addByBarcode() {
+  const barcode = document.getElementById('barcodeInput').value.trim();
+  if (!barcode) return;
+  const product = products.find(p => p.id === barcode || p.name.includes(barcode));
+  if (product) {
+    addToCart(product);
+    document.getElementById('barcodeInput').value = '';
+    document.getElementById('scanBox').classList.add('active');
+    setTimeout(() => document.getElementById('scanBox').classList.remove('active'), 300);
+  } else {
+    alert('未找到商品: ' + barcode);
+  }
+}
+function submitPayment() {
+  const received = parseFloat(document.getElementById('receivedAmount').value) || 0;
+  const total = parseFloat(document.getElementById('total').textContent) || 0;
+  if (received < total) {
+    alert('实收金额不足！');
+    return;
+  }
+  printReceipt();
+  document.getElementById('paymentModal').classList.add('show');
+}
+function printReceipt() {
+  const now = new Date();
+  const time = now.toLocaleString('zh-CN');
+  const total = parseFloat(document.getElementById('total').textContent);
+  const received = parseFloat(document.getElementById('receivedAmount').value) || total;
+  const change = received - total;
+  let items = '';
+  cart.forEach(item => {
+    const lineTotal = item.price * item.quantity;
+    items += `${item.name} x${item.quantity}\n      ¥${lineTotal.toFixed(2)}\n`;
+  });
+  const receipt = `╔════════════════════╗
+║      收银小票       ║
+╚════════════════════╝
+━━━━━━━━━━━━━━━━━━━━━━
+日期: ${time}
+━━━━━━━━━━━━━━━━━━━━━━
+商品明细:
+${items}━━━━━━━━━━━━━━━━━━━━━━
+商品数量: ${cart.reduce((sum, item) => sum + item.quantity, 0)} 件
+──────────────────────
+合计金额: ¥${total.toFixed(2)}
+支付方式: ${payMethod === 'wechat' ? '微信支付' : '支付宝'}
+实收金额: ¥${received.toFixed(2)}
+找零金额: ¥${change.toFixed(2)}
+━━━━━━━━━━━━━━━━━━━━━━
+感谢您的光临！
+欢迎下次再来！
+╔════════════════════╗`;
+  document.getElementById('receiptContent').textContent = receipt;
+}
+function closeModal() {
+  document.getElementById('paymentModal').classList.remove('show');
+  clearCart();
+}
+function logout() {
+  if (confirm('确定要退出登录吗？')) {
+    window.location.href = 'login-preview.html';
+  }
+}
+initProducts();
+document.getElementById('barcodeInput').focus();
+</script>
+</body>
+</html>

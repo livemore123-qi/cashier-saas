@@ -1,0 +1,30 @@
+name: cashier_saas
+description: 收银系统 Android 客户端
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  webview_flutter: ^4.10.0
+  sqflite: ^2.4.0
+  esc_pos_utils: ^1.1.0
+  flutter_blue_plus: ^1.34.0
+  connectivity_plus: ^6.1.0
+  mobile_scanner: ^6.0.0
+  path_provider: ^2.1.0
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

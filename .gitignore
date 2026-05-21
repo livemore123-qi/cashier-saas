@@ -67,3 +67,8 @@ playwright/.auth/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Electron build output
+clients/electron/release/
+clients/electron/dist/
+clients/electron/node_modules/

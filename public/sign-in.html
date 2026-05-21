@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>收银系统 - 登录</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',-apple-system,Arial,sans-serif;background:linear-gradient(135deg,#eff6ff,#e0e7ff);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{width:100%;max-width:420px;margin:20px}
+.card{background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.12);overflow:hidden}
+.header{background:linear-gradient(135deg,#2563eb,#4f46e5);padding:32px 24px;text-align:center}
+.logo-box{width:64px;height:64px;background:#fff;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.logo-box svg{width:40px;height:40px;color:#4f46e5}
+.header h1{color:#fff;font-size:24px;font-weight:700;letter-spacing:1px}
+.header p{color:#bfdbfe;font-size:13px;margin-top:6px}
+.body{padding:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:6px}
+.field input{width:100%;padding:12px 16px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;color:#1f2937;outline:none;transition:border-color .2s,box-shadow .2s}
+.field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.field input::placeholder{color:#9ca3af}
+.field .hint{font-size:12px;color:#9ca3af;margin-top:4px}
+.row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.row label{display:flex;align-items:center;cursor:pointer;font-size:13px;color:#6b7280}
+.row input[type=checkbox]{width:16px;height:16px;border-radius:4px;margin-right:6px;accent-color:#2563eb}
+.row a{font-size:13px;color:#2563eb;text-decoration:none}
+.row a:hover{text-decoration:underline}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:4px}
+.btn:hover{opacity:.9}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.reg{text-align:center;margin-top:16px;font-size:13px;color:#9ca3af}
+.reg a{color:#2563eb;text-decoration:none;margin-left:4px}
+.reg a:hover{text-decoration:underline}
+.msg{margin-top:16px;padding:12px;border-radius:10px;font-size:13px;text-align:center;display:none}
+.msg.show{display:block}
+.msg.error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+.msg.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a}
+.footer{background:#f9fafb;padding:16px;text-align:center;font-size:12px;color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="header">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10 0h2v2h-2v-2zm-6-4h8v2h-8v-2z"/></svg>
+      </div>
+      <h1>收银系统</h1>
+      <p>欢迎回来，请登录您的账户</p>
+    </div>
+    <div class="body">
+      <div class="field">
+        <label>用户名</label>
+        <input type="text" id="username" placeholder="请输入用户名" autocomplete="username">
+        <p class="hint">请输入您的用户名</p>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password">
+        <p class="hint">请输入您的密码</p>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="rememberMe"> 记住我</label>
+        <a href="#">忘记密码？</a>
+      </div>
+      <button class="btn" id="loginBtn" onclick="doLogin()">登 录</button>
+      <div class="reg">还没有账户？<a href="#">立即注册</a></div>
+      <div id="msg" class="msg"></div>
+    </div>
+    <div class="footer">如有问题请联系管理员</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var saved = localStorage.getItem('ns-remember-username');
+  if (saved) {
+    document.getElementById('username').value = saved;
+    document.getElementById('rememberMe').checked = true;
+  }
+
+  document.getElementById('rememberMe').onchange = function(){
+    var u = document.getElementById('username').value;
+    if (this.checked && u) localStorage.setItem('ns-remember-username', u);
+    else if (!this.checked) localStorage.removeItem('ns-remember-username');
+  };
+
+  window.doLogin = function(){
+    var btn = document.getElementById('loginBtn');
+    var msg = document.getElementById('msg');
+    var username = document.getElementById('username').value.trim();
+    var password = document.getElementById('password').value.trim();
+    var remember = document.getElementById('rememberMe').checked;
+
+    msg.className = 'msg';
+
+    if (!username) { showMsg('请输入用户名', 'error'); return; }
+    if (!password || password.length < 6) { showMsg('密码长度不能少于6位', 'error'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '登录中...';
+
+    // 记住用户名
+    if (remember) { localStorage.setItem('ns-remember-username', username); }
+    else { localStorage.removeItem('ns-remember-username'); }
+
+    // 尝试连接服务端登录
+    var API = 'http://localhost:' + (location.port || '8000');
+    fetch(API + '/sanctum/csrf-cookie', { credentials: 'include' })
+      .then(function(){ return fetch(API + '/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'include',
+        body: JSON.stringify({ username: username, password: password })
+      })})
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if (data.data && data.data.redirectTo) {
+          showMsg('登录成功，正在跳转...', 'success');
+          setTimeout(function(){ location.href = data.data.redirectTo; }, 600);
+        } else {
+          showMsg(data.message || '用户名或密码错误', 'error');
+          btn.disabled = false;
+          btn.textContent = '登 录';
+        }
+      })
+      .catch(function(e){
+        showMsg('无法连接服务器，请确认服务已启动 (' + e.message + ')', 'error');
+        btn.disabled = false;
+        btn.textContent = '登 录';
+      });
+  };
+
+  function showMsg(text, type){
+    var msg = document.getElementById('msg');
+    msg.className = 'msg show ' + type;
+    msg.textContent = text;
+  }
+})();
+</script>
+</body>
+</html>

@@ -44,6 +44,7 @@ $middleware->group( 'web', [
  */
 $middleware->group( 'api', [
     \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+    \App\Http\Middleware\ForceJsonResponse::class,
     \App\Http\Middleware\LoadLangMiddleware::class,
     \App\Http\Middleware\ThrottleMiddelware::class . ':80,1',
 ] );

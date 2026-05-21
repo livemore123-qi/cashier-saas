@@ -24,16 +24,18 @@ class AuthLoginFields extends FieldsService
         $fields = Hook::filter( 'ns-login-fields',
             Form::fields(
                 FormInput::text(
-                    label: __( 'Username' ),
-                    description: __( 'Provide your username.' ),
+                    label: __( '用户名' ),
+                    description: __( '请输入您的用户名' ),
                     validation: 'required|min:5',
                     name: 'username',
+                    placeholder: __( '请输入用户名' ),
                 ),
                 FormInput::password(
-                    label: __( 'Password' ),
-                    description: __( 'Provide your password.' ),
+                    label: __( '密码' ),
+                    description: __( '请输入您的密码' ),
                     validation: 'required|min:6',
                     name: 'password',
+                    placeholder: __( '请输入密码' ),
                 )
             )
         );
